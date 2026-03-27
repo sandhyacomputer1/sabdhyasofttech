@@ -1,0 +1,202 @@
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { HiStar } from 'react-icons/hi';
+import SectionTitle from '../ui/SectionTitle';
+
+const testimonials = [
+    // Add your real client testimonials here
+    // Format: { id, name, position, rating, testimonial }
+    
+    {
+        id: 1,
+        name: 'Rajesh Sharma',
+        position: 'CEO',
+        rating: 5,
+        testimonial: 'Sandhya SoftTech delivered our enterprise software on time and exceeded all expectations. Their attention to detail and technical expertise is unmatched. Highly recommended!'
+    },
+    {
+        id: 2,
+        name: 'Priya Patel',
+        position: 'CTO',
+        rating: 5,
+        testimonial: 'The mobile app they developed has transformed our business. User engagement increased by 300% within 3 months. Exceptional work!'
+    },
+    {
+        id: 3,
+        name: 'Amit Kumar',
+        position: 'Product Manager',
+        rating: 5,
+        testimonial: 'Professional team, excellent communication, and outstanding results. They understood our requirements perfectly and delivered beyond expectations.'
+    },
+    {
+        id: 4,
+        name: 'Sarah Johnson',
+        position: 'Marketing Director',
+        rating: 5,
+        testimonial: 'The AI-powered analytics platform has revolutionized how we understand our customers. Sandhya SoftTech are true innovators!'
+    },
+    {
+        id: 5,
+        name: 'Michael Chen',
+        position: 'Operations Head',
+        rating: 5,
+        testimonial: 'Scalable, secure, and perfectly tailored to our needs. The best development partner we\'ve worked with in 15 years.'
+    },
+    {
+        id: 6,
+        name: 'David Wilson',
+        position: 'Technical Lead',
+        rating: 5,
+        testimonial: 'Outstanding development quality and exceptional support. They delivered exactly what we needed, on time and within budget.'
+    }
+];
+
+const StarRating = ({ rating }) => {
+    return (
+        <div className="flex gap-1">
+            {[...Array(5)].map((_, i) => (
+                <HiStar 
+                    key={i} 
+                    className={`text-lg ${i < rating ? 'text-orange-400 fill-current' : 'text-gray-600'}`} 
+                />
+            ))}
+        </div>
+    );
+};
+
+const TestimonialCard = ({ testimonial, index, inView }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: index * 0.15 }}
+            whileHover={{ 
+                y: -5,
+                scale: 1.02,
+                borderColor: "rgba(255, 107, 0, 0.5)"
+            }}
+            className="glass rounded-2xl p-6 border border-orange-500/10 hover:border-orange-500/30 transition-all duration-300 h-full"
+        >
+            <div className="text-center h-full flex flex-col">
+                {/* Stars */}
+                <div className="flex justify-center mb-4">
+                    <StarRating rating={testimonial.rating} />
+                </div>
+                
+                {/* Testimonial text */}
+                <p className="text-gray-300 text-sm leading-relaxed mb-4 italic flex-grow">
+                    "{testimonial.testimonial}"
+                </p>
+                
+                {/* Name and position */}
+                <div className="border-t border-white/10 pt-4 mt-auto">
+                    <h4 className="font-display font-bold text-white text-base mb-1">{testimonial.name}</h4>
+                    <p className="text-gray-400 text-xs">{testimonial.position}</p>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
+const Testimonials = () => {
+    const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
+    const [currentSet, setCurrentSet] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+    const [timeoutId, setTimeoutId] = useState(null);
+
+    // Split testimonials into groups of 3
+    const testimonialSets = [
+        testimonials.slice(0, 3),  // First 3 cards
+        testimonials.slice(3, 6)   // Next 3 cards
+    ];
+
+    // Auto-scroll every 5 seconds
+    useEffect(() => {
+        if (!inView || isPaused) return;
+        
+        const interval = setInterval(() => {
+            setCurrentSet((prev) => (prev + 1) % testimonialSets.length);
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [inView, isPaused]);
+
+    // Handle hover pause
+    const handleMouseEnter = () => {
+        setIsPaused(true);
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+    };
+
+    const handleMouseLeave = () => {
+        // Resume after 5 seconds
+        const newTimeoutId = setTimeout(() => {
+            setIsPaused(false);
+        }, 4000);
+        setTimeoutId(newTimeoutId);
+    };
+
+    const currentTestimonials = testimonialSets[currentSet];
+
+    return (
+        <section id="testimonials" className="section-padding bg-dark-100 relative overflow-hidden">
+            {/* Background effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/3 via-transparent to-transparent pointer-events-none" />
+
+            <div className="container-custom">
+                <SectionTitle
+                    label="Client Testimonials"
+                    title={<>What Our <span className="text-gradient">Clients Say</span></>}
+                    subtitle="Real experiences from professionals we've helped transform with our software solutions."
+                    center
+                />
+
+                {/* Testimonials Grid - 3 Cards at a time */}
+                <div className="relative mt-12" ref={ref}>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentSet}
+                            initial={{ opacity: 0, x: 100 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -100 }}
+                            transition={{ duration: 0.5 }}
+                            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            {currentTestimonials.map((testimonial, index) => (
+                                <TestimonialCard 
+                                    key={testimonial.id}
+                                    testimonial={testimonial}
+                                    index={index}
+                                    inView={inView}
+                                />
+                            ))}
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+
+                {/* Progress Indicators */}
+                <div className="flex justify-center gap-2 mt-8">
+                    {testimonialSets.map((_, index) => (
+                        <motion.button
+                            key={index}
+                            onClick={() => setCurrentSet(index)}
+                            whileHover={{ scale: 1.2 }}
+                            whileTap={{ scale: 0.8 }}
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                                index === currentSet 
+                                    ? 'bg-orange-500 w-8' 
+                                    : 'bg-gray-600 hover:bg-gray-500 w-2'
+                            }`}
+                        />
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+export default Testimonials;

@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Publicly readable collections (Jobs and Projects)
+    match /jobs/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /projects/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Publicly writable-only collections (Form Submissions)
+    match /contactMessages/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    match /jobApplications/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    match /futureApplications/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+    
+    match /demoRequests/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+  }
+}

@@ -1,0 +1,97 @@
+/* Custom Cursor Styles - Ultra Fast Responsive */
+* {
+  cursor: none !important;
+}
+
+.custom-cursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #FF6B00;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  /* No transitions for instant response */
+}
+
+.cursor-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: #FF6B00;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.cursor-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  /* Fast transition only for opacity */
+  transition: opacity 0.05s ease;
+}
+
+.custom-cursor.hover {
+  width: 40px;
+  height: 40px;
+  border-color: #FF8C42;
+  background: rgba(255, 107, 0, 0.1);
+}
+
+.custom-cursor.hover .cursor-ring {
+  opacity: 1;
+}
+
+.custom-cursor.click {
+  width: 15px;
+  height: 15px;
+  border-color: #FF4500;
+}
+
+.cursor-trail {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, rgba(255, 107, 0, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: opacity 0.1s ease;
+}
+
+.custom-cursor:not(.click) ~ .cursor-trail {
+  opacity: 0.4;
+}
+
+/* Mobile devices - hide custom cursor */
+@media (pointer: coarse) {
+  * {
+    cursor: auto !important;
+  }
+  
+  .custom-cursor,
+  .cursor-trail {
+    display: none !important;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-trail {
+    display: none;
+  }
+}
