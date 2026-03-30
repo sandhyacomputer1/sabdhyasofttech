@@ -44,9 +44,6 @@ const industries = [
 const Industries = () => {
     return (
         <section id="industries" className="section-padding bg-dark-100 relative overflow-hidden">
-            {/* Background Texture */}
-            <div className="absolute inset-0 noise-bg opacity-[0.03] pointer-events-none" />
-            
             <div className="container-custom relative z-10">
                 <div className="text-center mb-12 px-4">
                     <SectionTitle

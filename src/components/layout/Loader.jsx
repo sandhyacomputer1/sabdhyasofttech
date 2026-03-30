@@ -28,7 +28,6 @@ const Loader = ({ onComplete }) => {
                     transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                     className="absolute top-1/2 -left-32 w-[500px] h-[500px] rounded-full bg-orange-600/5 blur-[100px]" 
                 />
-                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
             </div>
 
             <motion.div

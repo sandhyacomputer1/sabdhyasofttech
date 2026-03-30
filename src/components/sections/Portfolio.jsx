@@ -82,14 +82,14 @@ const Portfolio = () => {
                                             backgroundSize: '20px 20px',
                                         }}
                                     />
-                                    <div className="absolute inset-0 flex items-center justify-center p-8">
+                                    <div className="absolute inset-0 flex items-center justify-center">
                                         {p.logoURL ? (
                                             <motion.img
                                                 initial={{ scale: 0.8, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
                                                 src={p.logoURL}
                                                 alt={p.title}
-                                                className="w-full h-full object-contain drop-shadow-2xl"
+                                                className="w-full h-full object-cover drop-shadow-2xl"
                                             />
                                         ) : (
                                             <HiChip className="text-6xl text-orange-500/30" />

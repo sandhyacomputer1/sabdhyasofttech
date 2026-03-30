@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getContactMessages, getJobApplications, addJob, updateJob, deleteJob, getJobs, getProjects, addProject, updateProject, deleteProject } from '../../firebase/firestore';
+import { getContactMessages, getJobApplications, addJob, updateJob, deleteJob, getJobs, getProjects, addProject, updateProject, deleteProject, getTestimonials, addTestimonial, updateTestimonial, deleteTestimonial, toggleTestimonialStatus, getFranchises, addFranchise, updateFranchise, deleteFranchise, toggleFranchiseStatus } from '../../firebase/firestore';
 import { uploadProjectImage } from '../../firebase/storage';
-import { HiMail, HiBriefcase, HiDownload, HiLogout, HiRefresh, HiPlus, HiTrash, HiPencil, HiEye, HiChip } from 'react-icons/hi';
+import { HiMail, HiBriefcase, HiDownload, HiLogout, HiRefresh, HiPlus, HiTrash, HiPencil, HiEye, HiChip, HiStar, HiUser } from 'react-icons/hi';
 
 const AdminDashboard = () => {
     const { currentUser, logout } = useAuth();
@@ -13,11 +13,17 @@ const AdminDashboard = () => {
     const [applications, setApplications] = useState([]);
     const [jobs, setJobs] = useState([]);
     const [projects, setProjects] = useState([]);
+    const [testimonials, setTestimonials] = useState([]);
+    const [franchises, setFranchises] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showJobForm, setShowJobForm] = useState(false);
     const [showProjectForm, setShowProjectForm] = useState(false);
+    const [showTestimonialForm, setShowTestimonialForm] = useState(true);
+    const [showFranchiseForm, setShowFranchiseForm] = useState(false);
     const [editingJob, setEditingJob] = useState(null);
     const [editingProject, setEditingProject] = useState(null);
+    const [editingTestimonial, setEditingTestimonial] = useState(null);
+    const [editingFranchise, setEditingFranchise] = useState(null);
     const [jobForm, setJobForm] = useState({
         title: '',
         dept: '',
@@ -38,22 +44,45 @@ const AdminDashboard = () => {
         slider: [],
         sliderPreviews: []
     });
+    const [testimonialForm, setTestimonialForm] = useState({
+        name: '',
+        position: '',
+        rating: 5,
+        testimonial: '',
+        status: 'active'
+    });
+    const [franchiseForm, setFranchiseForm] = useState({
+        name: '',
+        location: '',
+        image: '',
+        brochure: '',
+        mapLink: '',
+        description: '',
+        established: '',
+        teamSize: '',
+        services: [''],
+        status: 'active'
+    });
 
     if (!currentUser) return <Navigate to="/admin" replace />;
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [msgs, apps, jobList, projList] = await Promise.all([
+            const [msgs, apps, jobList, projList, testimonialList, franchiseList] = await Promise.all([
                 getContactMessages(),
                 getJobApplications(),
                 getJobs(),
-                getProjects()
+                getProjects(),
+                getTestimonials(),
+                getFranchises()
             ]);
             setMessages(msgs);
             setApplications(apps);
             setJobs(jobList);
             setProjects(projList);
+            setTestimonials(testimonialList);
+            setFranchises(franchiseList);
         } catch (err) {
             console.error(err);
         } finally {
@@ -218,6 +247,131 @@ const AdminDashboard = () => {
         }
     };
 
+    // Testimonial handlers
+    const handleTestimonialSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingTestimonial) {
+                await updateTestimonial(editingTestimonial.id, testimonialForm);
+                setEditingTestimonial(null);
+            } else {
+                await addTestimonial(testimonialForm);
+            }
+            setTestimonialForm({
+                name: '',
+                position: '',
+                rating: 5,
+                testimonial: '',
+                status: 'active'
+            });
+            setShowTestimonialForm(false);
+            await fetchData();
+        } catch (err) {
+            console.error('Error saving testimonial:', err);
+            alert('Error saving testimonial: ' + err.message);
+        }
+    };
+
+    const handleEditTestimonial = (testimonial) => {
+        setEditingTestimonial(testimonial);
+        setTestimonialForm({
+            name: testimonial.name || '',
+            position: testimonial.position || '',
+            rating: testimonial.rating || 5,
+            testimonial: testimonial.testimonial || '',
+            status: testimonial.status || 'active'
+        });
+        setShowTestimonialForm(true);
+    };
+
+    const handleDeleteTestimonial = async (testimonialId) => {
+        if (window.confirm('Are you sure you want to delete this testimonial?')) {
+            try {
+                await deleteTestimonial(testimonialId);
+                await fetchData();
+            } catch (err) {
+                console.error('Error deleting testimonial:', err);
+            }
+        }
+    };
+
+    const handleToggleTestimonialStatus = async (testimonial) => {
+        try {
+            await toggleTestimonialStatus(testimonial.id, testimonial.status);
+            await fetchData();
+        } catch (err) {
+            console.error('Error toggling testimonial status:', err);
+        }
+    };
+
+    // Franchise handlers
+    const handleFranchiseSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingFranchise) {
+                await updateFranchise(editingFranchise.id, franchiseForm);
+                setEditingFranchise(null);
+            } else {
+                await addFranchise(franchiseForm);
+            }
+            setFranchiseForm({
+                name: '',
+                location: '',
+                image: '',
+                brochure: '',
+                mapLink: '',
+                description: '',
+                established: '',
+                teamSize: '',
+                services: [''],
+                status: 'active'
+            });
+            setShowFranchiseForm(false);
+            await fetchData();
+        } catch (err) {
+            console.error('Error saving franchise:', err);
+            alert('Error saving franchise: ' + err.message);
+        }
+    };
+
+    const handleEditFranchise = (franchise) => {
+        setEditingFranchise(franchise);
+        setFranchiseForm({
+            name: franchise.name || '',
+            location: franchise.location || '',
+            image: franchise.image || '',
+            brochure: franchise.brochure || '',
+            mapLink: franchise.mapLink || '',
+            description: franchise.description || '',
+            established: franchise.established || '',
+            teamSize: franchise.teamSize || '',
+            services: franchise.services || [''],
+            status: franchise.status || 'active'
+        });
+        setShowFranchiseForm(true);
+    };
+
+    const handleDeleteFranchise = async (franchiseId) => {
+        if (window.confirm('Are you sure you want to delete this franchise?')) {
+            try {
+                await deleteFranchise(franchiseId);
+                await fetchData();
+            } catch (err) {
+                console.error('Error deleting franchise:', err);
+                alert('Error deleting franchise: ' + err.message);
+            }
+        }
+    };
+
+    const handleToggleFranchiseStatus = async (franchise) => {
+        try {
+            await toggleFranchiseStatus(franchise.id, franchise.status);
+            await fetchData();
+        } catch (err) {
+            console.error('Error toggling franchise status:', err);
+        }
+    };
+
     const formatDate = (ts) => {
         if (!ts) return '–';
         const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -263,7 +417,8 @@ const AdminDashboard = () => {
                         { label: 'Applications', val: applications.length, icon: <HiBriefcase className="text-orange-500" /> },
                         { label: 'Job Postings', val: jobs.length, icon: <HiBriefcase className="text-orange-500" /> },
                         { label: 'Total Projects', val: projects.length, icon: <HiChip className="text-orange-500" /> },
-                        { label: 'Pending Apps', val: applications.filter((a) => a.status === 'pending').length, icon: <HiBriefcase className="text-orange-500" /> },
+                        { label: 'Testimonials', val: testimonials.length, icon: <HiStar className="text-orange-500" /> },
+                        { label: 'Franchises', val: franchises.length, icon: <HiUser className="text-orange-500" /> },
                     ].map((s, i) => (
                         <motion.div
                             key={s.label}
@@ -282,12 +437,14 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-3 mb-6">
+                <div className="flex gap-3 mb-6 flex-wrap">
                     {[
                         { key: 'messages', label: 'Contact Messages', icon: <HiMail /> },
                         { key: 'applications', label: 'Job Applications', icon: <HiBriefcase /> },
                         { key: 'jobs', label: 'Manage Jobs', icon: <HiBriefcase /> },
                         { key: 'projects', label: 'Manage Projects', icon: <HiChip /> },
+                        { key: 'testimonials', label: 'Testimonials', icon: <HiStar /> },
+                        { key: 'franchises', label: 'Franchises', icon: <HiUser /> },
                     ].map((t) => (
                         <button
                             key={t.key}
@@ -824,6 +981,418 @@ const AdminDashboard = () => {
                                                     ) : <span className="text-gray-600 text-xs">Not uploaded</span>}
                                                 </td>
                                                 <td className="px-5 py-3.5 text-gray-500 text-xs whitespace-nowrap">{formatDate(a.createdAt)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Testimonials Management Tab */}
+                {tab === 'testimonials' && (
+                    <div className="glass rounded-2xl border border-orange-500/10 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                            <h2 className="font-display font-bold text-white text-base">Manage Testimonials ({testimonials.length})</h2>
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                onClick={() => setShowTestimonialForm(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                            >
+                                <HiPlus /> Add New Testimonial
+                            </motion.button>
+                        </div>
+                        
+                        {showTestimonialForm && (
+                            <form onSubmit={handleTestimonialSubmit} className="p-6 space-y-4 border-b border-white/5">
+                                <h3 className="font-display font-bold text-white text-lg mb-4">
+                                    {editingTestimonial ? 'Edit Testimonial' : 'Add New Testimonial'}
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Client Name *</label>
+                                        <input
+                                            type="text"
+                                            value={testimonialForm.name}
+                                            onChange={(e) => setTestimonialForm({ ...testimonialForm, name: e.target.value })}
+                                            className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Position *</label>
+                                        <input
+                                            type="text"
+                                            value={testimonialForm.position}
+                                            onChange={(e) => setTestimonialForm({ ...testimonialForm, position: e.target.value })}
+                                            className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Rating *</label>
+                                        <select
+                                            value={testimonialForm.rating}
+                                            onChange={(e) => setTestimonialForm({ ...testimonialForm, rating: parseInt(e.target.value) })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                            required
+                                        >
+                                            <option value={5} className="bg-[#1a1a2e] text-white">5 Stars</option>
+                                            <option value={4} className="bg-[#1a1a2e] text-white">4 Stars</option>
+                                            <option value={3} className="bg-[#1a1a2e] text-white">3 Stars</option>
+                                            <option value={2} className="bg-[#1a1a2e] text-white">2 Stars</option>
+                                            <option value={1} className="bg-[#1a1a2e] text-white">1 Star</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-2">Testimonial *</label>
+                                    <textarea
+                                        value={testimonialForm.testimonial}
+                                        onChange={(e) => setTestimonialForm({ ...testimonialForm, testimonial: e.target.value })}
+                                        className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white h-24 resize-none"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-2">Status</label>
+                                    <select
+                                        value={testimonialForm.status}
+                                        onChange={(e) => setTestimonialForm({ ...testimonialForm, status: e.target.value })}
+                                        className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                    >
+                                        <option value="active" className="bg-[#1a1a2e] text-white">Active</option>
+                                        <option value="inactive" className="bg-[#1a1a2e] text-white">Inactive</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-3">
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        type="submit"
+                                        className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                                    >
+                                        {editingTestimonial ? 'Update Testimonial' : 'Add Testimonial'}
+                                    </motion.button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        type="button"
+                                        onClick={() => {
+                                            setShowTestimonialForm(false);
+                                            setEditingTestimonial(null);
+                                            setTestimonialForm({
+                                                name: '',
+                                                position: '',
+                                                rating: 5,
+                                                testimonial: '',
+                                                status: 'active'
+                                            });
+                                        }}
+                                        className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </motion.button>
+                                </div>
+                            </form>
+                        )}
+
+                        {testimonials.length === 0 ? (
+                            <div className="text-center py-16 text-gray-500">No testimonials yet. Click "Add New Testimonial" to get started.</div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="border-b border-white/5">
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Client</th>
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Position</th>
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Rating</th>
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Status</th>
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {testimonials.map((testimonial, index) => (
+                                            <tr key={testimonial.id} className={`border-b border-white/5 hover:bg-white/2 transition-colors ${index % 2 === 0 ? '' : 'bg-white/[0.01]'}`}>
+                                                <td className="px-5 py-3.5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                                                            <HiUser className="text-white text-sm" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-white font-medium">{testimonial.name}</p>
+                                                            <p className="text-gray-500 text-xs truncate max-w-xs">"{testimonial.testimonial.substring(0, 50)}..."</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-5 py-3.5 text-gray-400">{testimonial.position}</td>
+                                                <td className="px-5 py-3.5">
+                                                    <div className="flex items-center gap-1">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <HiStar key={i} className={`text-sm ${i < testimonial.rating ? 'text-orange-400 fill-current' : 'text-gray-600'}`} />
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                                <td className="px-5 py-3.5">
+                                                    <button
+                                                        onClick={() => handleToggleTestimonialStatus(testimonial)}
+                                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                                                            testimonial.status === 'active' 
+                                                                ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' 
+                                                                : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                                                        }`}
+                                                    >
+                                                        {testimonial.status === 'active' ? 'Active' : 'Inactive'}
+                                                    </button>
+                                                </td>
+                                                <td className="px-5 py-3.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => handleEditTestimonial(testimonial)}
+                                                            className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                                            title="Edit"
+                                                        >
+                                                            <HiPencil />
+                                                        </motion.button>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => handleDeleteTestimonial(testimonial.id)}
+                                                            className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                            title="Delete"
+                                                        >
+                                                            <HiTrash />
+                                                        </motion.button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Franchises Management Tab */}
+                {tab === 'franchises' && (
+                    <div className="glass rounded-2xl border border-orange-500/10 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                            <h2 className="font-display font-bold text-white text-base">Manage Franchises ({franchises.length})</h2>
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                onClick={() => setShowFranchiseForm(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                            >
+                                <HiPlus /> Add New Franchise
+                            </motion.button>
+                        </div>
+                        
+                        {showFranchiseForm && (
+                            <form onSubmit={handleFranchiseSubmit} className="p-6 space-y-4 border-b border-white/5">
+                                <h3 className="font-display font-bold text-white text-lg mb-4">
+                                    {editingFranchise ? 'Edit Franchise' : 'Add New Franchise'}
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Franchise Name *</label>
+                                        <input
+                                            type="text"
+                                            value={franchiseForm.name}
+                                            onChange={(e) => setFranchiseForm({ ...franchiseForm, name: e.target.value })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Location *</label>
+                                        <input
+                                            type="text"
+                                            value={franchiseForm.location}
+                                            onChange={(e) => setFranchiseForm({ ...franchiseForm, location: e.target.value })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Image URL</label>
+                                        <input
+                                            type="text"
+                                            value={franchiseForm.image}
+                                            onChange={(e) => setFranchiseForm({ ...franchiseForm, image: e.target.value })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                            placeholder="/images/franchises/pune.jpg"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Brochure PDF URL</label>
+                                        <input
+                                            type="text"
+                                            value={franchiseForm.brochure}
+                                            onChange={(e) => setFranchiseForm({ ...franchiseForm, brochure: e.target.value })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                            placeholder="/pdfs/franchises/pune-brochure.pdf"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Google Maps Link</label>
+                                        <input
+                                            type="text"
+                                            value={franchiseForm.mapLink}
+                                            onChange={(e) => setFranchiseForm({ ...franchiseForm, mapLink: e.target.value })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                            placeholder="https://maps.google.com/?q=Location"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Established Year</label>
+                                        <input
+                                            type="text"
+                                            value={franchiseForm.established}
+                                            onChange={(e) => setFranchiseForm({ ...franchiseForm, established: e.target.value })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                            placeholder="2022"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Team Size</label>
+                                        <input
+                                            type="text"
+                                            value={franchiseForm.teamSize}
+                                            onChange={(e) => setFranchiseForm({ ...franchiseForm, teamSize: e.target.value })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                            placeholder="25+"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Status</label>
+                                        <select
+                                            value={franchiseForm.status}
+                                            onChange={(e) => setFranchiseForm({ ...franchiseForm, status: e.target.value })}
+                                            className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                        >
+                                            <option value="active" className="bg-[#1a1a2e] text-white">Active</option>
+                                            <option value="inactive" className="bg-[#1a1a2e] text-white">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-2">Description</label>
+                                    <textarea
+                                        value={franchiseForm.description}
+                                        onChange={(e) => setFranchiseForm({ ...franchiseForm, description: e.target.value })}
+                                        className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white h-24 resize-none focus:border-orange-500 focus:outline-none"
+                                        placeholder="Describe the franchise..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-2">Services (comma separated)</label>
+                                    <input
+                                        type="text"
+                                        value={franchiseForm.services.join(', ')}
+                                        onChange={(e) => setFranchiseForm({ ...franchiseForm, services: e.target.value.split(',').map(s => s.trim()).filter(s => s) })}
+                                        className="w-full px-4 py-2 bg-[#1a1a2e] border border-white/20 rounded-lg text-white focus:border-orange-500 focus:outline-none"
+                                        placeholder="Web Development, Mobile Apps, SaaS Solutions"
+                                    />
+                                </div>
+                                <div className="flex gap-3">
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        type="submit"
+                                        className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                                    >
+                                        {editingFranchise ? 'Update Franchise' : 'Add Franchise'}
+                                    </motion.button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        type="button"
+                                        onClick={() => {
+                                            setShowFranchiseForm(false);
+                                            setEditingFranchise(null);
+                                            setFranchiseForm({
+                                                name: '',
+                                                location: '',
+                                                image: '',
+                                                brochure: '',
+                                                mapLink: '',
+                                                description: '',
+                                                established: '',
+                                                teamSize: '',
+                                                services: [''],
+                                                status: 'active'
+                                            });
+                                        }}
+                                        className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </motion.button>
+                                </div>
+                            </form>
+                        )}
+
+                        {franchises.length === 0 ? (
+                            <div className="text-center py-16 text-gray-500">No franchises yet. Click "Add New Franchise" to get started.</div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="border-b border-white/5">
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Franchise</th>
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Location</th>
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Status</th>
+                                            <th className="px-5 py-3 text-left text-xs text-gray-500 font-medium">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {franchises.map((franchise, index) => (
+                                            <tr key={franchise.id} className={`border-b border-white/5 hover:bg-white/2 transition-colors ${index % 2 === 0 ? '' : 'bg-white/[0.01]'}`}>
+                                                <td className="px-5 py-3.5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                                                            <HiUser className="text-white text-sm" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-white font-medium">{franchise.name}</p>
+                                                            {franchise.established && <p className="text-gray-500 text-xs">Since {franchise.established}</p>}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-5 py-3.5 text-gray-400">{franchise.location}</td>
+                                                <td className="px-5 py-3.5">
+                                                    <button
+                                                        onClick={() => handleToggleFranchiseStatus(franchise)}
+                                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                                                            franchise.status === 'active' 
+                                                                ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' 
+                                                                : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                                                        }`}
+                                                    >
+                                                        {franchise.status === 'active' ? 'Active' : 'Inactive'}
+                                                    </button>
+                                                </td>
+                                                <td className="px-5 py-3.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => handleEditFranchise(franchise)}
+                                                            className="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                                            title="Edit"
+                                                        >
+                                                            <HiPencil />
+                                                        </motion.button>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => handleDeleteFranchise(franchise.id)}
+                                                            className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                            title="Delete"
+                                                        >
+                                                            <HiTrash />
+                                                        </motion.button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

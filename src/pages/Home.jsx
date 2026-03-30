@@ -10,6 +10,7 @@ const WhyUs = lazy(() => import('../components/sections/WhyUs'));
 const Process = lazy(() => import('../components/sections/Process'));
 const Stats = lazy(() => import('../components/sections/Stats'));
 const Portfolio = lazy(() => import('../components/sections/Portfolio'));
+const Franchises = lazy(() => import('../components/sections/Franchises'));
 const Testimonials = lazy(() => import('../components/sections/Testimonials'));
 
 const SectionLoader = () => (
@@ -46,6 +47,9 @@ const Home = () => (
         </Suspense>
         <Suspense fallback={<SectionLoader />}>
             <Testimonials />
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+            <Franchises />
         </Suspense>
     </main>
 );

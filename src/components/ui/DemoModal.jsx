@@ -1,17 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { submitDemoRequest } from '../../firebase/firestore';
+import { submitDemoRequest, getProjects } from '../../firebase/firestore';
 import { HiX, HiCheckCircle } from 'react-icons/hi';
-
-const products = [
-    'Hospital Management System',
-    'E-Commerce Platform',
-    'Inventory SaaS',
-    'Delivery Tracking App',
-    'HR Management Portal',
-    'EdTech Learning Platform',
-    'Other',
-];
 
 const DemoModal = ({ isOpen, onClose }) => {
     const [form, setForm] = useState({
@@ -26,6 +16,22 @@ const DemoModal = ({ isOpen, onClose }) => {
     });
     const [status, setStatus] = useState('idle'); // idle | loading | success | error
     const [errorMsg, setErrorMsg] = useState('');
+    const [projects, setProjects] = useState([]);
+    const [loadingProjects, setLoadingProjects] = useState(true);
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const data = await getProjects();
+                setProjects(data);
+            } catch (err) {
+                console.error('Error fetching projects:', err);
+            } finally {
+                setLoadingProjects(false);
+            }
+        };
+        fetchProjects();
+    }, []);
 
     const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
@@ -171,11 +177,15 @@ const DemoModal = ({ isOpen, onClose }) => {
                                             onChange={handleChange}
                                             required
                                             className="w-full bg-dark-300 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition-colors appearance-none"
+                                            disabled={loadingProjects}
                                         >
-                                            <option value="" disabled>Select a product...</option>
-                                            {products.map((p) => (
-                                                <option key={p} value={p}>{p}</option>
+                                            <option value="" disabled>
+                                                {loadingProjects ? 'Loading products...' : 'Select a product...'}
+                                            </option>
+                                            {projects.map((p) => (
+                                                <option key={p.id} value={p.title}>{p.title}</option>
                                             ))}
+                                            <option value="Other">Other</option>
                                         </select>
                                     </div>
 

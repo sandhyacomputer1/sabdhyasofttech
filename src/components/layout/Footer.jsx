@@ -8,6 +8,8 @@ import LegalModal from '../ui/LegalModal';
 const Footer = () => {
 
     const year = new Date().getFullYear();
+    const [showLegalModal, setShowLegalModal] = useState(false);
+    const [activeContent, setActiveContent] = useState('privacy');
 
     const quickLinks = [
         { name: 'Home', to: '/' },
@@ -172,27 +174,43 @@ const Footer = () => {
                         &copy; {year} Sandhya SoftTech Pvt. Ltd. All rights reserved.
                     </p>
                     <div className="flex items-center gap-4">
-                        <Link
-                            to="/privacy-policy"
-                            className="text-gray-500 text-xs hover:text-orange-500 transition-colors"
+                        <button
+                            onClick={() => {
+                                setActiveContent('privacy');
+                                setShowLegalModal(true);
+                            }}
+                            className="text-gray-500 text-xs hover:text-orange-500 transition-colors bg-transparent border-none cursor-pointer"
                         >
                             Privacy Policy
-                        </Link>
-                        <Link
-                            to="/terms-of-use"
-                            className="text-gray-500 text-xs hover:text-orange-500 transition-colors"
+                        </button>
+                        <button
+                            onClick={() => {
+                                setActiveContent('terms');
+                                setShowLegalModal(true);
+                            }}
+                            className="text-gray-500 text-xs hover:text-orange-500 transition-colors bg-transparent border-none cursor-pointer"
                         >
                             Terms of Use
-                        </Link>
-                        <Link
-                            to="/cookie-policy"
-                            className="text-gray-500 text-xs hover:text-orange-500 transition-colors"
+                        </button>
+                        <button
+                            onClick={() => {
+                                setActiveContent('cookies');
+                                setShowLegalModal(true);
+                            }}
+                            className="text-gray-500 text-xs hover:text-orange-500 transition-colors bg-transparent border-none cursor-pointer"
                         >
                             Cookie Policy
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </footer>
+
+            {/* Legal Modal */}
+            <LegalModal 
+                isOpen={showLegalModal}
+                onClose={() => setShowLegalModal(false)}
+                activeContent={activeContent}
+            />
 
         </>
     );

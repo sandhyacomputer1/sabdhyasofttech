@@ -104,3 +104,85 @@ export const deleteProject = async (projectId) => {
     const projectRef = doc(db, 'projects', projectId);
     return await deleteDoc(projectRef);
 };
+
+// --- Testimonials CRUD ---
+
+export const getTestimonials = async () => {
+    const q = query(collection(db, 'testimonials'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const getTestimonial = async (testimonialId) => {
+    const { getDoc } = await import('firebase/firestore'); 
+    const testimonialRef = doc(db, 'testimonials', testimonialId);
+    const docSnap = await getDoc(testimonialRef);
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+};
+
+export const addTestimonial = async (testimonialData) => {
+    return await addDoc(collection(db, 'testimonials'), {
+        ...testimonialData,
+        createdAt: serverTimestamp(),
+    });
+};
+
+export const updateTestimonial = async (testimonialId, testimonialData) => {
+    const testimonialRef = doc(db, 'testimonials', testimonialId);
+    return await updateDoc(testimonialRef, testimonialData);
+};
+
+export const deleteTestimonial = async (testimonialId) => {
+    const testimonialRef = doc(db, 'testimonials', testimonialId);
+    return await deleteDoc(testimonialRef);
+};
+
+export const toggleTestimonialStatus = async (testimonialId, currentStatus) => {
+    const testimonialRef = doc(db, 'testimonials', testimonialId);
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    return await updateDoc(testimonialRef, { status: newStatus, updatedAt: serverTimestamp() });
+};
+
+// --- Franchises CRUD ---
+
+export const getFranchises = async () => {
+    const q = query(collection(db, 'franchises'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const getFranchise = async (franchiseId) => {
+    const { getDoc } = await import('firebase/firestore'); 
+    const franchiseRef = doc(db, 'franchises', franchiseId);
+    const docSnap = await getDoc(franchiseRef);
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+};
+
+export const addFranchise = async (franchiseData) => {
+    return await addDoc(collection(db, 'franchises'), {
+        ...franchiseData,
+        createdAt: serverTimestamp(),
+    });
+};
+
+export const updateFranchise = async (franchiseId, franchiseData) => {
+    const franchiseRef = doc(db, 'franchises', franchiseId);
+    return await updateDoc(franchiseRef, franchiseData);
+};
+
+export const deleteFranchise = async (franchiseId) => {
+    const franchiseRef = doc(db, 'franchises', franchiseId);
+    return await deleteDoc(franchiseRef);
+};
+
+export const toggleFranchiseStatus = async (franchiseId, currentStatus) => {
+    const franchiseRef = doc(db, 'franchises', franchiseId);
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    return await updateDoc(franchiseRef, { status: newStatus, updatedAt: serverTimestamp() });
+};

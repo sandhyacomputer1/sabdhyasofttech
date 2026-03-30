@@ -15,9 +15,6 @@ const Careers = lazy(() => import('./pages/Careers.jsx'));
 const Contact = lazy(() => import('./pages/Contact'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
-const TermsOfUse = lazy(() => import('./pages/TermsOfUse'));
-const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -51,9 +48,6 @@ const AnimatedRoutes = () => {
               <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-use" element={<TermsOfUse />} />
-              <Route path="/cookie-policy" element={<CookiePolicy />} />
             </Routes>
           </Suspense>
         </motion.main>

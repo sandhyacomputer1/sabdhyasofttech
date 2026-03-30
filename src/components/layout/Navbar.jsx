@@ -66,7 +66,7 @@ const Navbar = () => {
                             />
                             <div className="leading-tight">
                                 <p className="font-display font-bold text-white text-xl tracking-widest block">SANDHYA</p>
-                                <p className="font-display font-bold text-xs tracking-[0.2em] text-gradient block ml-0.5">SOFTTECH</p>
+                                <p className="font-display font-bold text-xs tracking-[0.2em] text-gradient block ml-0.5">SOFTTECH PVT LTD</p>
                             </div>
                         </a>
                     </div>

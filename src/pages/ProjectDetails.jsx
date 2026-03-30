@@ -82,7 +82,6 @@ const ProjectDetails = () => {
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute -top-24 -right-24 w-[600px] h-[600px] rounded-full bg-orange-500/10 blur-[120px]" />
                 <div className="absolute top-1/2 -left-24 w-[400px] h-[400px] rounded-full bg-orange-600/5 blur-[100px]" />
-                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
             </div>
 
             {/* Container pushed to left edge specifically (px-[30px]) */}
