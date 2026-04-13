@@ -79,6 +79,7 @@ const AnimatedRoutes = () => {
               <Route path="/admin/messages" element={<MessageManager />} />
               <Route path="/admin/testimonials" element={<TestimonialManager />} />
               <Route path="/admin/applications" element={<ApplicationManager />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </motion.main>
