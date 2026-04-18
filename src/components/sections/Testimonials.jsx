@@ -12,6 +12,13 @@ const Testimonials = () => {
     const [currentSet, setCurrentSet] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [timeoutId, setTimeoutId] = useState(null);
+    const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         const fetchTestimonials = async () => {
@@ -29,22 +36,24 @@ const Testimonials = () => {
         fetchTestimonials();
     }, []);
 
-    // Split testimonials into groups of 3
+    // Split testimonials into groups (3 for desktop/tablet, 1 for mobile as requested)
+    const setSize = isMobile ? 1 : 3;
     const testimonialSets = [];
-    for (let i = 0; i < testimonials.length; i += 3) {
-        testimonialSets.push(testimonials.slice(i, i + 3));
+    for (let i = 0; i < testimonials.length; i += setSize) {
+        testimonialSets.push(testimonials.slice(i, i + setSize));
     }
 
-    // Auto-scroll every 5 seconds
+    // Auto-scroll: 2 seconds on mobile, 5 seconds on desktop
     useEffect(() => {
         if (!inView || isPaused || testimonialSets.length <= 1) return;
         
+        const intervalDuration = isMobile ? 2000 : 5000;
         const interval = setInterval(() => {
             setCurrentSet((prev) => (prev + 1) % testimonialSets.length);
-        }, 5000);
+        }, intervalDuration);
 
         return () => clearInterval(interval);
-    }, [inView, isPaused, testimonialSets.length]);
+    }, [inView, isPaused, testimonialSets.length, isMobile]);
 
     // Handle hover pause
     const handleMouseEnter = () => {

@@ -72,7 +72,7 @@ const Process = () => {
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={inView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ duration: 0.6, delay: idx * 0.15 }}
-                                className="relative group text-center lg:text-left"
+                                className="relative group text-center lg:text-left max-w-[300px] mx-auto lg:max-w-none w-full"
                             >
                                 {/* Step Number & Icon */}
                                 <div className="flex flex-col items-center lg:items-start mb-6">

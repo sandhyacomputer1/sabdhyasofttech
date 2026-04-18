@@ -47,7 +47,7 @@ const LeaderCard = ({ leader, index }) => {
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="group relative"
+            className="group relative max-w-[320px] mx-auto sm:max-w-none w-full"
         >
             <div className="relative overflow-hidden rounded-2xl glass border border-white/5 aspect-[4/5] mb-4">
                 {/* Image */}

@@ -44,7 +44,7 @@ const ServiceCard = ({ service, index }) => {
             initial={{ opacity: 0, y: 50 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: index * 0.12 }}
-            className="glass rounded-2xl p-7 group relative overflow-hidden"
+            className="glass rounded-2xl p-7 group relative overflow-hidden max-w-[320px] mx-auto sm:max-w-none w-full"
             whileHover={{ 
                 y: -12,
                 scale: 1.03,
