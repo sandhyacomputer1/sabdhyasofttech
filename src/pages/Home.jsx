@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 // Lazy load sections for better performance
 import Hero from '../components/sections/Hero';
 const About = lazy(() => import('../components/sections/About'));
+const Leadership = lazy(() => import('../components/sections/Leadership'));
 const Services = lazy(() => import('../components/sections/Services'));
 const Industries = lazy(() => import('../components/sections/Industries'));
 const WhyUs = lazy(() => import('../components/sections/WhyUs'));
@@ -24,6 +25,7 @@ const Home = () => (
         <Hero />
         <Suspense fallback={<SectionLoader />}>
             <About />
+            <Leadership />
             <Services />
             <Industries />
             <WhyUs />
